@@ -1,0 +1,16 @@
+{
+    "cmake.generator": "Ninja",
+    "cmake.buildDirectory": "${workspaceRoot}/out/${buildType}-${command:azuresphere.AzureSphereTargetApiSet}",
+    "cmake.buildToolArgs": [ "-v" ],
+    "cmake.configureArgs": [ "--no-warn-unused-cli" ],
+    "cmake.configureSettings": {
+        "CMAKE_TOOLCHAIN_FILE": "${command:azuresphere.AzureSphereSdkDir}/CMakeFiles/AzureSphereToolchain.cmake",
+        "AZURE_SPHERE_TARGET_HARDWARE_DEFINITION_DIRECTORY": "${workspaceRoot}/hardware/mt3620_rdb",
+        "AZURE_SPHERE_TARGET_HARDWARE_DEFINITION": "sample_hardware.json",
+        "AZURE_SPHERE_TARGET_API_SET": "3"
+    },
+    "cmake.configureOnOpen": true,
+    "files.associations": {
+        "sample_hardware.h": "c"
+    }
+}
