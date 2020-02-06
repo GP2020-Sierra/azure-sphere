@@ -4,7 +4,7 @@
       "environment": "AzureSphere",
 
       "AzureSphereTargetApiSet": "3",
-      "AzureSphereTargetHardwareDefinitionDirectory": "${projectDir}\\hardware\\mt3620_rdb",
+      "AzureSphereTargetHardwareDefinitionDirectory": "${projectDir}\\hardware\\mt3620",
       "AzureSphereTargetHardwareDefinition": "sample_hardware.json"
     }
   ],
