@@ -8,12 +8,14 @@ PROJECT(Sierra2020 C)
 include_directories(libraries/ccs811)
 add_subdirectory(libraries/ccs811)
 
+include_directories(libraries/avnet_onboard)
+add_subdirectory(libraries/avnet_onboard)
+
 # Create executable
-# add_library (ccs811 ccs811.c)
 ADD_EXECUTABLE(${PROJECT_NAME} main.c)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} applibs pthread gcc_s c)
 
 # Add MakeImage post-build command
 INCLUDE("${AZURE_SPHERE_MAKE_IMAGE_FILE}")
 
-target_link_libraries (${PROJECT_NAME} ccs811 lib_ccs811)
+target_link_libraries (${PROJECT_NAME} ccs811 lib_ccs811 avnet_onboard)

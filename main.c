@@ -37,6 +37,8 @@
 
 #include "lib_ccs811.h"
 
+#include "onboard.h"
+
 // Support functions.
 static void TerminationHandler(int signalNumber);
 static int InitPeripheralsAndHandlers(void);
@@ -99,6 +101,8 @@ static int InitPeripheralsAndHandlers(void)
         return -1;
     }
 
+    initOnboardI2c();
+
     return 0;
 }
 
@@ -138,9 +142,11 @@ void ccs811Main(void) {
 
     for (int meas = 0; meas < 1000; meas++)
     {
+        OnboardResults_t results = readOnboardSensors();
+        Log_Debug("Temperatures: %f %f\nPressure: %f", results.lsm6dsoTemperature_degC, results.lps22hhTemperature_degC, results.pressure_hPa);
+
         if (ccs811_get_results(p_ccs, &tvoc, &eco2, 0, 0)) {
-            Log_Debug("CCS811 Sensor periodic: TVOC %d ppb, eCO2 %d ppm\n",
-                tvoc, eco2);
+            Log_Debug("CCS811 Sensor periodic: TVOC %d ppb, eCO2 %d ppm\n", tvoc, eco2);
         }
         else
         {
