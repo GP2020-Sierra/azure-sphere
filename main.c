@@ -43,7 +43,7 @@ static int InitPeripheralsAndHandlers(void);
 static void ClosePeripheralsAndHandlers(void);
 
 // File descriptors - initialized to invalid value
-static int i2cFd = -1;
+int i2cFd = -1;
 
 // Termination state
 static volatile sig_atomic_t terminationRequired = false;

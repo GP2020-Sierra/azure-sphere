@@ -4,7 +4,7 @@
       "environment": "AzureSphere",
 
       "AzureSphereTargetApiSet": "3",
-      "AzureSphereTargetHardwareDefinitionDirectory": "${projectDir}\\hardware\\mt3620",
+      "AzureSphereTargetHardwareDefinitionDirectory": "${projectDir}\\hardware\\avnet_mt3620_sk",
       "AzureSphereTargetHardwareDefinition": "sample_hardware.json"
     }
   ],

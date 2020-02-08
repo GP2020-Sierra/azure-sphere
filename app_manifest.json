@@ -6,8 +6,8 @@
   "CmdArgs": [],
   "Capabilities": {
     "Gpio": [ "$MT3620_RDB_LED1_GREEN", "$MT3620_RDB_LED1_RED", "$MT3620_RDB_LED1_BLUE",
-      "$MT3620_GPIO34", "$MT3620_GPIO35" ],
-    "I2cMaster": [ "$MT3620_RDB_HEADER4_ISU2_I2C" ]
+       "$MT3620_GPIO35" ],
+    "I2cMaster": [ "$MT3620_ISU2_I2C" ]
   },
   "ApplicationType":"Default"
 }
