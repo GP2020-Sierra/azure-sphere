@@ -134,8 +134,10 @@ void ccs811Main(void) {
 
     //ccs811_get_results(p_ccs, &tvoc, &eco2, 0, 0); // Ignore first reading as is borkened
 
+    OnboardResults_t results = readOnboardSensors();
+
     Log_Debug("CCS811 Calibrating...\n");
-    ccs811_set_environmental_data(p_ccs, 22.0f, 30.0f);
+    ccs811_set_environmental_data(p_ccs, results.lps22hhTemperature_degC, 30.0f);
     Log_Debug("CCS811 Calibrated\n");
 
     nanosleep(&sleepTime, NULL);
@@ -151,6 +153,13 @@ void ccs811Main(void) {
         else
         {
             Log_Debug("No results\n");
+        }
+
+        if (meas % 25 == 0) {
+
+            Log_Debug("CCS811 Re-Calibrating...\n");
+            ccs811_set_environmental_data(p_ccs, results.lps22hhTemperature_degC, 30.0f);
+            Log_Debug("CCS811 Calibrated\n");
         }
 
         nanosleep(&sleepTime, NULL);
