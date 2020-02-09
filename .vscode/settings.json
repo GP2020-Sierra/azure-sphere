@@ -12,5 +12,6 @@
     "cmake.configureOnOpen": true,
     "files.associations": {
         "sample_hardware.h": "c"
-    }
+    },
+    "C_Cpp.default.cStandard": "c99",
 }
