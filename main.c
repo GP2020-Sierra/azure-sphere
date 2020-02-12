@@ -39,6 +39,8 @@
 
 #include "onboard.h"
 
+#include "sensors.h"
+
 // Support functions.
 static void TerminationHandler(int signalNumber);
 static int InitPeripheralsAndHandlers(void);
@@ -113,9 +115,11 @@ static void ClosePeripheralsAndHandlers(void) {
     close(i2cFd);
 }
 
+
 /// <summary>
 ///     CCS811 demo application
 /// </summary>
+/* //Working version, being replaced
 void ccs811Main(void) {
 
     ccs811_t *p_ccs;
@@ -159,6 +163,8 @@ void ccs811Main(void) {
     Log_Debug("Close CCS\n");
     ccs811_close(p_ccs);
 }
+*/
+
 
 /// <summary>
 ///     Application main entry point
@@ -173,7 +179,11 @@ int main(void)
     }
 
     if (!terminationRequired) {
-        ccs811Main();
+        setUpSensors();
+        SensorResults_t results;
+        while(1) {
+            results = readSensors();
+        }        
     }
 
     Log_Debug("*** Terminating ***\n");
