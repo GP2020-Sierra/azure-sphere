@@ -24,6 +24,8 @@ void ccs811Setup(void) {
     Log_Debug("CCS811 Calibrating...\n");
     ccs811_set_environmental_data(p_ccs, 22.0f, 30.0f);
     Log_Debug("CCS811 Calibrated\n");
+
+    nanosleep(&sleepTime, NULL);
 }
 
 CCS811Results_t readCCS811(void) {
@@ -35,7 +37,7 @@ CCS811Results_t readCCS811(void) {
     nanosleep(&sleepTime, NULL);
 
     if (ccs811_get_results(p_ccs, &results.tvoc, &results.eco2, 0, 0)) {
-        Log_Debug("CCS811 Sensor periodic: TVOC %d ppb, eCO2 %d ppm\n", results.tvoc, results.eco2);
+        Log_Debug("Read ccs");
     }
     else
     {
@@ -44,8 +46,8 @@ CCS811Results_t readCCS811(void) {
 
     nanosleep(&sleepTime, NULL);
 
-    Log_Debug("Close CCS\n");
-    ccs811_close(p_ccs);
+    
+    nanosleep(&sleepTime, NULL);
 
     return results;
 }
@@ -56,9 +58,19 @@ SensorResults_t readSensors(void) {
     results.ccs811results = readCCS811();
     results.onboardresults = readOnboardSensors();
 
+    Log_Debug("Onboard Sensor: Temperature 1 %f, Temperature 2 %f\nCCS811 Sensor periodic: TVOC %d ppb, eCO2 %d ppm\n", results.onboardresults.lps22hhTemperature_degC, results.onboardresults.lsm6dsoTemperature_degC, results.ccs811results.tvoc, results.ccs811results.eco2);
+
+    results.timestamp = time(NULL);
+
     return results;
 }
 
 int setUpSensors(void) {
     ccs811Setup();
+    return 0;
+}
+
+int closeSensors(void) {
+    //need to close ccs
+    return 0;
 }

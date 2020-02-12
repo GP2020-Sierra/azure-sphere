@@ -182,7 +182,10 @@ int main(void)
         setUpSensors();
         SensorResults_t results;
         while(1) {
-            results = readSensors();
+            if((time(NULL) - results.timestamp) > 15) {
+                Log_Debug("15 seconds passed");
+                results = readSensors();
+            }
         }        
     }
 
