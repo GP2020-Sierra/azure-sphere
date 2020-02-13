@@ -11,4 +11,6 @@
 
 int setUpMessages(int argc, char *argv[]);
 
-static void SendTelemetry(const unsigned char *key, const unsigned char *value);
+void SendTelemetry(const unsigned char *key, const unsigned char *value);
+
+void TerminationHandler(int signalNumber)

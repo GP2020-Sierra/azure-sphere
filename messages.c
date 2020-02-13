@@ -46,7 +46,7 @@ static void ReportStatusCallback(int result, void *context);
 static const char *GetReasonString(IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason);
 static const char *getAzureSphereProvisioningResultString(
     AZURE_SPHERE_PROV_RETURN_VALUE provisioningResult);
-static void SendTelemetry(const unsigned char *key, const unsigned char *value);
+void SendTelemetry(const unsigned char *key, const unsigned char *value);
 static void SetupAzureClient(void);
 
 // Function to generate simulated Temperature data/telemetry
@@ -77,7 +77,7 @@ static void AzureTimerEventHandler(EventData *eventData);
 /// <summary>
 ///     Signal handler for termination requests. This handler must be async-signal-safe.
 /// </summary>
-static void TerminationHandler(int signalNumber)
+void TerminationHandler(int signalNumber)
 {
     // Don't use Log_Debug here, as it is not guaranteed to be async-signal-safe.
     terminationRequired = true;
@@ -104,11 +104,11 @@ int setUpMessages(int argc, char *argv[])
 
     
     // Main loop
-    while (!terminationRequired) {
-        if (WaitForEventAndCallHandler(epollFd) != 0) {
-            terminationRequired = true;
-        }
-    }
+    // while (!terminationRequired) {
+    //     if (WaitForEventAndCallHandler(epollFd) != 0) {
+    //         terminationRequired = true;
+    //     }
+    // }
     
 
     //ClosePeripheralsAndHandlers();
@@ -379,7 +379,7 @@ static const char *getAzureSphereProvisioningResultString(
 /// </summary>
 /// <param name="key">The telemetry item to update</param>
 /// <param name="value">new telemetry value</param>
-static void SendTelemetry(const unsigned char *key, const unsigned char *value)
+void SendTelemetry(const unsigned char *key, const unsigned char *value)
 {
     static char eventBuffer[100] = {0};
     static const char *EventMsgTemplate = "{ \"%s\": \"%s\" }";
