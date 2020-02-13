@@ -173,7 +173,6 @@ void ccs811Main(void) {
 }
 */
 
-
 /// <summary>
 ///     Application main entry point
 /// </summary>
@@ -191,10 +190,18 @@ int main(int argc, char *argv[])
     if (!terminationRequired) {
         setUpSensors();
         SensorResults_t results;
+        char tempBuffer[20];
+        int len;
         while(1) {
-            if((time(NULL) - results.timestamp) > 2) {
+            if((time(NULL) - results.timestamp) > 15) {
                 Log_Debug("15 seconds passed");
                 results = readSensors();
+                len = snprintf(tempBuffer, 20, "%3.2f", results.onboardresults.lps22hhTemperature_degC);
+                if (len > 0) {
+                    SendTelemetry("Temperature", tempBuffer);
+                }
+                //WaitForEventAndCallHandler(epollFd);
+                DoThing();
             }
         }        
     }

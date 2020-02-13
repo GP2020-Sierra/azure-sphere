@@ -77,7 +77,7 @@ static void AzureTimerEventHandler(EventData *eventData);
 /// <summary>
 ///     Signal handler for termination requests. This handler must be async-signal-safe.
 /// </summary>
-void TerminationHandler(int signalNumber)
+static void TerminationHandler(int signalNumber)
 {
     // Don't use Log_Debug here, as it is not guaranteed to be async-signal-safe.
     terminationRequired = true;
@@ -116,6 +116,10 @@ int setUpMessages(int argc, char *argv[])
     //Log_Debug("Application exiting.\n");
 
     return 0;
+}
+
+int DoThing(void) {
+    return WaitForEventAndCallHandler(epollFd);
 }
 
 /// <summary>
