@@ -3,11 +3,13 @@
   "Name": "Sierra2020",
   "ComponentId": "198d2ef2-87b3-43e1-92de-697054d59edc",
   "EntryPoint": "/bin/app",
-  "CmdArgs": [],
+  "CmdArgs": ["0ne000C2425"],
   "Capabilities": {
+    "AllowedConnections": [ "global.azure-devices-provisioning.net", "GP2020-Sierra.azure-devices.net" ],
     "Gpio": [ "$MT3620_RDB_LED1_GREEN", "$MT3620_RDB_LED1_RED", "$MT3620_RDB_LED1_BLUE",
        "$MT3620_GPIO35" ],
-    "I2cMaster": [ "$MT3620_ISU2_I2C" ]
+    "I2cMaster": [ "$MT3620_ISU2_I2C" ],
+    "DeviceAuthentication": "810e74f0-5889-44e7-a14d-22166304cfbf"
   },
   "ApplicationType":"Default"
 }

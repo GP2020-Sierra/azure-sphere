@@ -20,9 +20,10 @@ void ccs811Setup(void) {
 
     nanosleep(&sleepTime, NULL);
 
+    OnboardResults_t onboardResults = readOnboardSensors();
     
     Log_Debug("CCS811 Calibrating...\n");
-    ccs811_set_environmental_data(p_ccs, 22.0f, 30.0f);
+    ccs811_set_environmental_data(p_ccs, onboardResults.lps22hhTemperature_degC, 30.0f);
     Log_Debug("CCS811 Calibrated\n");
 
     nanosleep(&sleepTime, NULL);

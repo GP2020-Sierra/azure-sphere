@@ -36,10 +36,9 @@
 #define PROJECT_ISU2_I2C MT3620_RDB_HEADER4_ISU2_I2C
 
 #include "lib_ccs811.h"
-
 #include "onboard.h"
-
 #include "sensors.h"
+#include "messages.h"
 
 // Support functions.
 static void TerminationHandler(int signalNumber);
@@ -178,7 +177,7 @@ void ccs811Main(void) {
 /// <summary>
 ///     Application main entry point
 /// </summary>
-int main(void)
+int main(int argc, char *argv[])
 {
     Log_Debug("\n*** Starting ***\n");
 
@@ -187,11 +186,13 @@ int main(void)
         terminationRequired = true;
     }
 
+    setUpMessages(argc, argv);
+
     if (!terminationRequired) {
         setUpSensors();
         SensorResults_t results;
         while(1) {
-            if((time(NULL) - results.timestamp) > 15) {
+            if((time(NULL) - results.timestamp) > 2) {
                 Log_Debug("15 seconds passed");
                 results = readSensors();
             }
