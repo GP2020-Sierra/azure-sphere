@@ -121,13 +121,13 @@ static void ClosePeripheralsAndHandlers(void) {
 }
 
 
-void sendResults(SensorResults_t* results) {
+void sendResults(SensorResults_t* results, int resultsLen) {
     const unsigned int messageSize = 500;
     char* csv = (char *)malloc(messageSize);
     // timestamp, tempLPS, tempLSM, tempDHT, pressure, humidity, eco2, tvoc
     int n = 0;
     n = sprintf(csv, "timestamp,count,tempLPS,tempLSM,tempDHT,pressure,humidity,eco2,tvoc\n");
-    for (int i = 0; i < READINGS_BEFORE_SEND; i++) {
+    for (int i = 0; i < resultsLen; i++) {
         SensorResults_t result = results[i];
         n += sprintf(&csv[n], "%u,%u,%.2f,%.2f,%.2f,%.2f,%.2f,%d,%d\n", result.timestamp, result.counter, result.onboardresults.lps22hhTemperature_degC, result.onboardresults.lsm6dsoTemperature_degC, 0.0, 0.0, 0.0, result.ccs811results.eco2, result.ccs811results.tvoc);
         
@@ -229,7 +229,7 @@ int main(int argc, char *argv[])
                 n += 1;
                 if (n==READINGS_BEFORE_SEND) {
                     Log_Debug("Time to send");
-                    sendResults(resultsToSend);
+                    sendResults(resultsToSend, READINGS_BEFORE_SEND);
                     n = 0;
                 }
                 //WaitForEventAndCallHandler(epollFd);
