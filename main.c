@@ -16,6 +16,7 @@
 #include <signal.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <applibs/log.h>
 #include <applibs/gpio.h>
@@ -39,6 +40,11 @@
 #include "onboard.h"
 #include "sensors.h"
 #include "messages.h"
+
+// Set to change frequency of readings and sending
+#define TIME_BETWEEN_READINGS 2
+// time in seconds
+#define READINGS_BEFORE_SEND 5
 
 // Support functions.
 static void TerminationHandler(int signalNumber);
@@ -112,6 +118,27 @@ static int InitPeripheralsAndHandlers(void)
 /// </summary>
 static void ClosePeripheralsAndHandlers(void) {
     close(i2cFd);
+}
+
+
+void sendResults(SensorResults_t* results) {
+    const unsigned int messageSize = 500;
+    char* csv = (char *)malloc(messageSize);
+    // timestamp, tempLPS, tempLSM, tempDHT, pressure, humidity, eco2, tvoc
+    int n = 0;
+    n = sprintf(csv, "timestamp,count,tempLPS,tempLSM,tempDHT,pressure,humidity,eco2,tvoc\n");
+    for (int i = 0; i < READINGS_BEFORE_SEND; i++) {
+        SensorResults_t result = results[i];
+        n += sprintf(&csv[n], "%u,%u,%.2f,%.2f,%.2f,%.2f,%.2f,%d,%d\n", result.timestamp, result.counter, result.onboardresults.lps22hhTemperature_degC, result.onboardresults.lsm6dsoTemperature_degC, 0.0, 0.0, 0.0, result.ccs811results.eco2, result.ccs811results.tvoc);
+        
+    }
+    if (n<1) {
+        Log_Debug("CSV string write failed.");
+    } else {
+        Log_Debug("CSV string write succeeded");
+    }
+    SendTelemetryCSV(csv);
+    free(csv);
 }
 
 
@@ -189,22 +216,30 @@ int main(int argc, char *argv[])
 
     if (!terminationRequired) {
         setUpSensors();
-        SensorResults_t results;
-        char tempBuffer[20];
-        int len;
+        SensorResults_t result;
+        //char tempBuffer[20];
+        SensorResults_t* resultsToSend = (SensorResults_t *)malloc(sizeof(SensorResults_t) * READINGS_BEFORE_SEND);
+        int n = 0;
         while(1) {
-            if((time(NULL) - results.timestamp) > 15) {
-                Log_Debug("15 seconds passed");
-                results = readSensors();
-                len = snprintf(tempBuffer, 20, "%3.2f", results.onboardresults.lps22hhTemperature_degC);
-                if (len > 0) {
-                    SendTelemetry("Temperature", tempBuffer);
+            if((time(NULL) - result.timestamp) >= TIME_BETWEEN_READINGS) {
+                Log_Debug("Time for next reading");
+                result = readSensors();
+                //len = snprintf(tempBuffer, 20, "%3.2f", results.onboardresults.lps22hhTemperature_degC);
+                resultsToSend[n] = result;
+                n += 1;
+                if (n==READINGS_BEFORE_SEND) {
+                    Log_Debug("Time to send");
+                    sendResults(resultsToSend);
+                    n = 0;
                 }
                 //WaitForEventAndCallHandler(epollFd);
-                DoThing();
+                iotConnect();
             }
-        }        
+        }      
+        free(resultsToSend);  
     }
+
+    
 
     Log_Debug("*** Terminating ***\n");
     ClosePeripheralsAndHandlers();

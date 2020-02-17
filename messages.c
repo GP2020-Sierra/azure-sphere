@@ -50,7 +50,7 @@ void SendTelemetry(const unsigned char *key, const unsigned char *value);
 static void SetupAzureClient(void);
 
 // Function to generate simulated Temperature data/telemetry
-static void SendSimulatedTemperature(void);
+//static void SendSimulatedTemperature(void);
 
 // Initialization/Cleanup
 static int InitPeripheralsAndHandlers(void);
@@ -118,7 +118,8 @@ int setUpMessages(int argc, char *argv[])
     return 0;
 }
 
-int DoThing(void) {
+int iotConnect(void) {
+    IoTHubDeviceClient_LL_DoWork(iothubClientHandle);
     return WaitForEventAndCallHandler(epollFd);
 }
 
@@ -383,17 +384,40 @@ static const char *getAzureSphereProvisioningResultString(
 /// </summary>
 /// <param name="key">The telemetry item to update</param>
 /// <param name="value">new telemetry value</param>
-void SendTelemetry(const unsigned char *key, const unsigned char *value)
+
+// void SendTelemetry(const unsigned char *key, const unsigned char *value)
+// {
+//     static char eventBuffer[100] = {0};
+//     static const char *EventMsgTemplate = "{ \"%s\": \"%s\" }";
+//     int len = snprintf(eventBuffer, sizeof(eventBuffer), EventMsgTemplate, key, value);
+//     if (len < 0)
+//         return;
+
+//     Log_Debug("Sending IoT Hub Message: %s\n", eventBuffer);
+
+//     IOTHUB_MESSAGE_HANDLE messageHandle = IoTHubMessage_CreateFromString(eventBuffer);
+
+//     if (messageHandle == 0) {
+//         Log_Debug("WARNING: unable to create a new IoTHubMessage\n");
+//         return;
+//     }
+
+//     if (IoTHubDeviceClient_LL_SendEventAsync(iothubClientHandle, messageHandle, SendMessageCallback,
+//                                              /*&callback_param*/ 0) != IOTHUB_CLIENT_OK) {
+//         Log_Debug("WARNING: failed to hand over the message to IoTHubClient\n");
+//     } else {
+//         Log_Debug("INFO: IoTHubClient accepted the message for delivery\n");
+//     }
+
+//     IoTHubMessage_Destroy(messageHandle);
+// }
+
+
+void SendTelemetryCSV(const unsigned char *csv)
 {
-    static char eventBuffer[100] = {0};
-    static const char *EventMsgTemplate = "{ \"%s\": \"%s\" }";
-    int len = snprintf(eventBuffer, sizeof(eventBuffer), EventMsgTemplate, key, value);
-    if (len < 0)
-        return;
+    Log_Debug("Sending IoT Hub Message: %s\n", csv);
 
-    Log_Debug("Sending IoT Hub Message: %s\n", eventBuffer);
-
-    IOTHUB_MESSAGE_HANDLE messageHandle = IoTHubMessage_CreateFromString(eventBuffer);
+    IOTHUB_MESSAGE_HANDLE messageHandle = IoTHubMessage_CreateFromString(csv);
 
     if (messageHandle == 0) {
         Log_Debug("WARNING: unable to create a new IoTHubMessage\n");
@@ -478,4 +502,8 @@ void SendSimulatedTemperature(void)
         SendTelemetry("Temperature", tempBuffer);
 }
 */
+
+
+
+
 

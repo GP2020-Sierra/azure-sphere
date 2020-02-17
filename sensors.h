@@ -13,6 +13,7 @@ typedef struct CCS811Results {
 
 typedef struct SensorResults {
     time_t timestamp;
+    long unsigned int counter;
     CCS811Results_t ccs811results;
     OnboardResults_t onboardresults;
 } SensorResults_t;

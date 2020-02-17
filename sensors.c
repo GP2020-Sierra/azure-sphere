@@ -7,6 +7,7 @@
 
 ccs811_t *p_ccs;
 extern int i2cFd;
+static long unsigned int resultCounter;
 
 void ccs811Setup(void) {
     Log_Debug("Open CCS\n");
@@ -62,6 +63,10 @@ SensorResults_t readSensors(void) {
     Log_Debug("Onboard Sensor: Temperature 1 %f, Temperature 2 %f\nCCS811 Sensor periodic: TVOC %d ppb, eCO2 %d ppm\n", results.onboardresults.lps22hhTemperature_degC, results.onboardresults.lsm6dsoTemperature_degC, results.ccs811results.tvoc, results.ccs811results.eco2);
 
     results.timestamp = time(NULL);
+
+    results.counter = resultCounter;
+
+    resultCounter++;
 
     return results;
 }
