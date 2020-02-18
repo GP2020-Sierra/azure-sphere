@@ -42,9 +42,9 @@
 #include "messages.h"
 
 // Set to change frequency of readings and sending
-#define TIME_BETWEEN_READINGS 2
+#define TIME_BETWEEN_READINGS 10
 // time in seconds
-#define READINGS_BEFORE_SEND 5
+#define READINGS_BEFORE_SEND 6
 
 // Support functions.
 static void TerminationHandler(int signalNumber);
