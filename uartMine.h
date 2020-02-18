@@ -17,3 +17,5 @@
 #include <applibs/log.h>
 
 void UartEventHandler(EventData *eventData);
+
+void UartSetup(void);

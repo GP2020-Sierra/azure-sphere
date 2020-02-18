@@ -11,10 +11,8 @@
 #include "applibs_versions.h"
 #include "epoll_timerfd_utilities.h"
 #include "parson.h"
-#include <applibs/gpio.h>
 #include <applibs/log.h>
 #include <applibs/uart.h>
-
 
 #include "sensors.h"
 #include "uartMine.h"
@@ -23,41 +21,59 @@
 // File descriptors - initialized to invalid value
 extern int uartFd;
 
-// State variables
-static GPIO_Value_Type buttonState = GPIO_Value_High;
-
 // Termination state
-static volatile sig_atomic_t terminationRequired = false;
+extern volatile sig_atomic_t terminationRequired;
 
-uint8_t* returnBuffer = 0;
-int inputN = 0;
-extern char* message;
+#define BUFFER_SIZE 1024
+static size_t bufferUsed = 0;
+static unsigned char* mainBuffer;
+static unsigned char* copyBuffer;
 
-void putTogether(uint8_t* buffer, int bytesRead) {
-    if ( ((char *)buffer)[0] == "{"[0] || inputN > 0) {
-        Log_Debug("current message: \"%s\",   buffer: \"%s\",   inputN %d, bytesRead %d", message, (char *)buffer, inputN, bytesRead);
-        int n = sprintf(&message[inputN], "%s", (char *)buffer);
-        Log_Debug(",   wrote %d\n", n);
-        inputN += bytesRead;
-        if (((char*)buffer)[bytesRead-2] == "}"[0]) {
-            Log_Debug("\nCHARS %d MESSAGE %s\n", inputN, (char *)message);
-            inputN = 0;
-            JSON_Value *rootProperties = json_parse_string(message);
-            if (rootProperties == NULL) {
-                Log_Debug("WARNING: Cannot parse the string as JSON content.\n");
-            }
+void UartSetup() {
+    mainBuffer = malloc(BUFFER_SIZE);
+    copyBuffer = malloc(BUFFER_SIZE);
+}
+
+static void processLine(void) {
+    // Log_Debug("[UART]: %s", mainBuffer);
+    
+    JSON_Value *rootProperties = json_parse_string(mainBuffer);
+    if (rootProperties == NULL) {
+        // if we can't parse it, it's probably just a debug message we can safely ignore
+        return;
+    }
+
+    JSON_Object *rootObject = json_value_get_object(rootProperties);
+    const char* sensor = json_object_dotget_string(rootObject, "sensor");
+    Log_Debug("Received new data from %s over UART\n", sensor); // probably want to comment this out later - lots of spam
+
+    // TODO depending on the sensor type, update a global variable storing the last read sensor values.
+    // then take/pass a copy of this in sensors.c
+}
+
+static int findLine(void) {
+    for (size_t i = 0; i <= bufferUsed; i++) {
+        if (mainBuffer[i] == '\n') {
+            mainBuffer[i] = '\0';
+            processLine();
+
+            memcpy(copyBuffer, &mainBuffer[i+1], BUFFER_SIZE - bufferUsed - 1);
+            memcpy(mainBuffer, copyBuffer, BUFFER_SIZE - bufferUsed - 1);
+            bufferUsed -= i + 1;
+        } else if (mainBuffer[i] == '\'') {
+            // esp code sends "JSON" but uses ' instead of "
+            // so convert them here
+            mainBuffer[i] = '"';
         }
     }
+
+    return 0;
 }
 
 void UartEventHandler(EventData *eventData) {
-    const size_t receiveBufferSize = 256;
-    uint8_t receiveBuffer[receiveBufferSize + 1]; // allow extra byte for string termination
-    ssize_t bytesRead;
-
     // Read incoming UART data. It is expected behavior that messages may be received in multiple
     // partial chunks.
-    bytesRead = read(uartFd, receiveBuffer, receiveBufferSize);
+    ssize_t bytesRead = read(uartFd, &mainBuffer[bufferUsed], BUFFER_SIZE - bufferUsed - 1);
     if (bytesRead < 0) {
         Log_Debug("ERROR: Could not read UART: %s (%d).\n", strerror(errno), errno);
         terminationRequired = true;
@@ -66,14 +82,9 @@ void UartEventHandler(EventData *eventData) {
 
     if (bytesRead > 0) {
         // Null terminate the buffer to make it a valid string, and print it
-        // Log_Debug("%c\n",((char *)receiveBuffer)[bytesRead-2]);
-        // if ((char *)receiveBuffer[bytesRead-2] == "}"[0]) {Log_Debug("JSON end\n");}
-        // if ((char *)receiveBuffer[0] == "{"[0]) { Log_Debug("JSON start\n");}
-        receiveBuffer[bytesRead] = 0;
-        //Log_Debug("UART received %d bytes: '%s'.\n", bytesRead, (char *)receiveBuffer);
-        //Log_Debug("!!! %s\n", (char *)receiveBuffer);
-        putTogether((char *)receiveBuffer, bytesRead);
-        
+        bufferUsed += (size_t) bytesRead;
+        mainBuffer[bufferUsed + 1] = 0;
+        while (findLine()) {};
     }
 }
 

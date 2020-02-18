@@ -59,11 +59,8 @@ int i2cFd = -1;
 int uartFd = -1;
 int epollFd = -1;
 
-//uart
-char* message;
-
 // Termination state
-static volatile sig_atomic_t terminationRequired = false;
+volatile sig_atomic_t terminationRequired = false;
 
 // event handler data structures. Only the event handler field needs to be populated.
 static EventData uartEventData = {.eventHandler = &UartEventHandler};
@@ -129,7 +126,6 @@ static int InitPeripheralsAndHandlers(void)
     // // Create a UART_Config object, open the UART and set up UART event handler
     UART_Config uartConfig;
     UART_InitConfig(&uartConfig);
-    message = malloc(512);
     uartConfig.baudRate = 115200;
     uartConfig.flowControl = UART_FlowControl_None;
     uartFd = UART_Open(SAMPLE_UART, &uartConfig);
@@ -140,6 +136,7 @@ static int InitPeripheralsAndHandlers(void)
     if (RegisterEventHandlerToEpoll(epollFd, uartFd, &uartEventData, EPOLLIN) != 0) {
         return -1;
     }
+    UartSetup();
 
     return 0;
 }

@@ -33,10 +33,6 @@ void ccs811Setup(void) {
 CCS811Results_t readCCS811(void) {
 
     CCS811Results_t results;
-    struct timespec sleepTime; //TODO: make nice sleepy function
-    sleepTime.tv_sec = 1;
-    sleepTime.tv_nsec = 0;
-    nanosleep(&sleepTime, NULL);
 
     if (ccs811_get_results(p_ccs, &results.tvoc, &results.eco2, 0, 0)) {
         Log_Debug("Read ccs");
@@ -45,11 +41,6 @@ CCS811Results_t readCCS811(void) {
     {
         Log_Debug("No results\n");
     }
-
-    nanosleep(&sleepTime, NULL);
-
-    
-    nanosleep(&sleepTime, NULL);
 
     return results;
 }
@@ -65,7 +56,6 @@ SensorResults_t readSensors(void) {
 
 
     results.counter = resultCounter;
-
     resultCounter++;
 
     return results;
