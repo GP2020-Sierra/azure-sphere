@@ -385,33 +385,6 @@ static const char *getAzureSphereProvisioningResultString(
 /// <param name="key">The telemetry item to update</param>
 /// <param name="value">new telemetry value</param>
 
-// void SendTelemetry(const unsigned char *key, const unsigned char *value)
-// {
-//     static char eventBuffer[100] = {0};
-//     static const char *EventMsgTemplate = "{ \"%s\": \"%s\" }";
-//     int len = snprintf(eventBuffer, sizeof(eventBuffer), EventMsgTemplate, key, value);
-//     if (len < 0)
-//         return;
-
-//     Log_Debug("Sending IoT Hub Message: %s\n", eventBuffer);
-
-//     IOTHUB_MESSAGE_HANDLE messageHandle = IoTHubMessage_CreateFromString(eventBuffer);
-
-//     if (messageHandle == 0) {
-//         Log_Debug("WARNING: unable to create a new IoTHubMessage\n");
-//         return;
-//     }
-
-//     if (IoTHubDeviceClient_LL_SendEventAsync(iothubClientHandle, messageHandle, SendMessageCallback,
-//                                              /*&callback_param*/ 0) != IOTHUB_CLIENT_OK) {
-//         Log_Debug("WARNING: failed to hand over the message to IoTHubClient\n");
-//     } else {
-//         Log_Debug("INFO: IoTHubClient accepted the message for delivery\n");
-//     }
-
-//     IoTHubMessage_Destroy(messageHandle);
-// }
-
 
 void SendTelemetryCSV(const unsigned char *csv)
 {
@@ -481,27 +454,6 @@ static void ReportStatusCallback(int result, void *context)
     Log_Debug("INFO: Device Twin reported properties update result: HTTP status code %d\n", result);
 }
 
-
-/*
-/// <summary>
-///     Generates a simulated Temperature and sends to IoT Hub.
-/// </summary>
-void SendSimulatedTemperature(void)
-{
-    static float temperature = 30.0;
-    float deltaTemp = (float)(rand() % 20) / 20.0f;
-    if (rand() % 2 == 0) {
-        temperature += deltaTemp;
-    } else {
-        temperature -= deltaTemp;
-    }
-
-    char tempBuffer[20];
-    int len = snprintf(tempBuffer, 20, "%3.2f", temperature);
-    if (len > 0)
-        SendTelemetry("Temperature", tempBuffer);
-}
-*/
 
 
 
