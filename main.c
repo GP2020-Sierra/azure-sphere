@@ -18,8 +18,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "applibs_versions.h"
 #include <applibs/log.h>
 #include <applibs/gpio.h>
+#include <applibs/uart.h>
 
 // By default, this sample's CMake build targets hardware that follows the MT3620
 // Reference Development Board (RDB) specification, such as the MT3620 Dev Kit from
@@ -40,6 +42,7 @@
 #include "onboard.h"
 #include "sensors.h"
 #include "messages.h"
+#include "uartMine.h"
 
 // Set to change frequency of readings and sending
 #define TIME_BETWEEN_READINGS 10
@@ -53,9 +56,17 @@ static void ClosePeripheralsAndHandlers(void);
 
 // File descriptors - initialized to invalid value
 int i2cFd = -1;
+int uartFd = -1;
+int epollFd = -1;
+
+//uart
+char* message;
 
 // Termination state
 static volatile sig_atomic_t terminationRequired = false;
+
+// event handler data structures. Only the event handler field needs to be populated.
+static EventData uartEventData = {.eventHandler = &UartEventHandler};
 
 /// <summary>
 ///     Signal handler for termination requests. This handler must be 
@@ -78,6 +89,11 @@ static int InitPeripheralsAndHandlers(void)
     memset(&action, 0, sizeof(struct sigaction));
     action.sa_handler = TerminationHandler;
     sigaction(SIGTERM, &action, NULL);
+
+    epollFd = CreateEpollFd();
+    if (epollFd < 0) {
+        return -1;
+    }
 
     // Init I2C
     i2cFd = I2CMaster_Open(PROJECT_ISU2_I2C);
@@ -110,6 +126,21 @@ static int InitPeripheralsAndHandlers(void)
 
     initOnboardI2c();
 
+    // // Create a UART_Config object, open the UART and set up UART event handler
+    UART_Config uartConfig;
+    UART_InitConfig(&uartConfig);
+    message = malloc(512);
+    uartConfig.baudRate = 115200;
+    uartConfig.flowControl = UART_FlowControl_None;
+    uartFd = UART_Open(SAMPLE_UART, &uartConfig);
+    if (uartFd < 0) {
+        Log_Debug("ERROR: Could not open UART: %s (%d).\n", strerror(errno), errno);
+        return -1;
+    }
+    if (RegisterEventHandlerToEpoll(epollFd, uartFd, &uartEventData, EPOLLIN) != 0) {
+        return -1;
+    }
+
     return 0;
 }
 
@@ -140,65 +171,6 @@ void sendResults(SensorResults_t* results, int resultsLen) {
     SendTelemetryCSV(csv);
     free(csv);
 }
-
-
-/// <summary>
-///     CCS811 demo application
-/// </summary>
-/* //Working version, being replaced
-void ccs811Main(void) {
-
-    ccs811_t *p_ccs;
-    Log_Debug("Open CCS\n");
-    p_ccs = ccs811_open(i2cFd, CCS811_I2C_ADDRESS_1, SK_SOCKET2_CS_GPIO);
-
-    struct timespec sleepTime;
-    sleepTime.tv_sec = 1;
-    sleepTime.tv_nsec = 0;
-
-    uint16_t tvoc;
-    uint16_t eco2;
-    ccs811_set_mode(p_ccs, CCS811_MODE_1S);
-
-    nanosleep(&sleepTime, NULL);
-
-    //ccs811_get_results(p_ccs, &tvoc, &eco2, 0, 0); // Ignore first reading as is borkened
-
-    OnboardResults_t results = readOnboardSensors();
-
-    Log_Debug("CCS811 Calibrating...\n");
-    ccs811_set_environmental_data(p_ccs, results.lps22hhTemperature_degC, 30.0f);
-    Log_Debug("CCS811 Calibrated\n");
-
-    nanosleep(&sleepTime, NULL);
-
-    for (int meas = 0; meas < 1000; meas++)
-    {
-        OnboardResults_t results = readOnboardSensors();
-        Log_Debug("Temperatures: %f %f\nPressure: %f", results.lsm6dsoTemperature_degC, results.lps22hhTemperature_degC, results.pressure_hPa);
-
-        if (ccs811_get_results(p_ccs, &tvoc, &eco2, 0, 0)) {
-            Log_Debug("CCS811 Sensor periodic: TVOC %d ppb, eCO2 %d ppm\n", tvoc, eco2);
-        }
-        else
-        {
-            Log_Debug("No results\n");
-        }
-
-        if (meas % 25 == 0) {
-
-            Log_Debug("CCS811 Re-Calibrating...\n");
-            ccs811_set_environmental_data(p_ccs, results.lps22hhTemperature_degC, 30.0f);
-            Log_Debug("CCS811 Calibrated\n");
-        }
-
-        nanosleep(&sleepTime, NULL);
-    }
-
-    Log_Debug("Close CCS\n");
-    ccs811_close(p_ccs);
-}
-*/
 
 /// <summary>
 ///     Application main entry point
@@ -232,19 +204,17 @@ int main(int argc, char *argv[])
                     sendResults(resultsToSend, READINGS_BEFORE_SEND);
                     n = 0;
                 }
-                //WaitForEventAndCallHandler(epollFd);
                 iotConnect();
             } else {
                 struct timespec sleepTime;
                 sleepTime.tv_sec = 1;
                 sleepTime.tv_nsec = 1000000; // 10ms
                 nanosleep(&sleepTime, NULL);
+                WaitForEventAndCallHandler(epollFd);
             }
         }      
         free(resultsToSend);  
     }
-
-    
 
     Log_Debug("*** Terminating ***\n");
     ClosePeripheralsAndHandlers();

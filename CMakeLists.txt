@@ -14,7 +14,7 @@ include_directories(libraries/avnet_onboard)
 add_subdirectory(libraries/avnet_onboard)
 
 # Create executable
-ADD_EXECUTABLE(${PROJECT_NAME} main.c sensors.c sensors.h messages.c messages.h)
+ADD_EXECUTABLE(${PROJECT_NAME} main.c sensors.c sensors.h messages.c messages.h uartMine.c uartMine.h)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} applibs pthread gcc_s c)
 #
 TARGET_INCLUDE_DIRECTORIES(${PROJECT_NAME} PUBLIC ${AZURE_SPHERE_API_SET_DIR}/usr/include/azureiot)
