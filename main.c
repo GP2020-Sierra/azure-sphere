@@ -234,6 +234,11 @@ int main(int argc, char *argv[])
                 }
                 //WaitForEventAndCallHandler(epollFd);
                 iotConnect();
+            } else {
+                struct timespec sleepTime;
+                sleepTime.tv_sec = 1;
+                sleepTime.tv_nsec = 1000000; // 10ms
+                nanosleep(&sleepTime, NULL);
             }
         }      
         free(resultsToSend);  
