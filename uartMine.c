@@ -51,25 +51,6 @@ static void processLine(void) {
     // then take/pass a copy of this in sensors.c
 }
 
-static int findLine(void) {
-    for (size_t i = 0; i <= bufferUsed; i++) {
-        if (mainBuffer[i] == '\n') {
-            mainBuffer[i] = '\0';
-            processLine();
-
-            memcpy(copyBuffer, &mainBuffer[i+1], BUFFER_SIZE - bufferUsed - 1);
-            memcpy(mainBuffer, copyBuffer, BUFFER_SIZE - bufferUsed - 1);
-            bufferUsed -= i + 1;
-        } else if (mainBuffer[i] == '\'') {
-            // esp code sends "JSON" but uses ' instead of "
-            // so convert them here
-            mainBuffer[i] = '"';
-        }
-    }
-
-    return 0;
-}
-
 void UartEventHandler(EventData *eventData) {
     // Read incoming UART data. It is expected behavior that messages may be received in multiple
     // partial chunks.
@@ -84,7 +65,23 @@ void UartEventHandler(EventData *eventData) {
         // Null terminate the buffer to make it a valid string, and print it
         bufferUsed += (size_t) bytesRead;
         mainBuffer[bufferUsed + 1] = 0;
-        while (findLine()) {};
+        
+        for (size_t i = 0; i <= bufferUsed; i++) {
+            if (mainBuffer[i] == '\n') {
+                mainBuffer[i] = '\0';
+                processLine();
+
+                memcpy(copyBuffer, &mainBuffer[i+1], BUFFER_SIZE - i - 1);
+                memcpy(mainBuffer, copyBuffer, BUFFER_SIZE - i - 1);
+                bufferUsed -= i + 1;
+
+                i = 0;
+            } else if (mainBuffer[i] == '\'') {
+                // esp code sends "JSON" but uses ' instead of "
+                // so convert them here
+                mainBuffer[i] = '"';
+            }
+        }
     }
 }
 
