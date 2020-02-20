@@ -164,7 +164,7 @@ void sendResults(SensorResults_t* results, int resultsLen) {
     n = sprintf(csv, "{\"data\": \"timestamp,count,tempLPS,tempLSM,tempDHT,pressure,humidity,eco2,tvoc,devs,bss\\n");
     for (int i = 0; i < resultsLen; i++) {
         SensorResults_t result = results[i];
-        n += sprintf(&csv[n], "%u,%u,%.2f,%.2f,%.2f,%.2f,%.2f,%d,%d\\n", result.timestamp, result.counter, result.onboardresults.lps22hhTemperature_degC, result.onboardresults.lsm6dsoTemperature_degC, result.dhtresults.dhtTemperature_degC, result.onboardresults.pressure_hPa, result.dhtresults.humidity, result.ccs811results.eco2, result.ccs811results.tvoc, result.espresults.devices, result.espresults.basestations);
+        n += sprintf(&csv[n], "%u,%u,%.2f,%.2f,%.2f,%.2f,%.2f,%d,%d,%u,%u\\n", result.timestamp, result.counter, result.onboardresults.lps22hhTemperature_degC, result.onboardresults.lsm6dsoTemperature_degC, result.dhtresults.dhtTemperature_degC, result.onboardresults.pressure_hPa, result.dhtresults.humidity, result.ccs811results.eco2, result.ccs811results.tvoc, result.espresults.devices, result.espresults.basestations);
     }
     n += sprintf(&csv[n], "\"}");
     if (n<1) {
