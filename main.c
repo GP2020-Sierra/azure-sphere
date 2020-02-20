@@ -182,7 +182,7 @@ int main(int argc, char *argv[])
 {
     Log_Debug("\n*** Starting ***\n");
     
-    setLedFds(); //why does this break everything :(
+    setLedFds();
     
     ledAngry(); 
 
