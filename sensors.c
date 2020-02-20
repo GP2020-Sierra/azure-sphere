@@ -14,27 +14,19 @@ static long unsigned int resultCounter;
 EspResults_t espresultsFromUart;
 DhtResults_t dhtresultsFromUart;
 
+/// <summary>
+///     Sets up CCS811 ready to read from.
+/// </summary>
 void ccs811Setup(void) {
     Log_Debug("Open CCS\n");
     p_ccs = ccs811_open(i2cFd, CCS811_I2C_ADDRESS_1, SK_SOCKET2_CS_GPIO);
 
-    struct timespec sleepTime; //TODO: make nice sleepy function
-    sleepTime.tv_sec = 1;
-    sleepTime.tv_nsec = 0;
-
     ccs811_set_mode(p_ccs, CCS811_MODE_1S);
-
-    nanosleep(&sleepTime, NULL);
-
-    OnboardResults_t onboardResults = readOnboardSensors();
-    
-    Log_Debug("CCS811 Calibrating...\n");
-    ccs811_set_environmental_data(p_ccs, onboardResults.lps22hhTemperature_degC, 30.0f);
-    Log_Debug("CCS811 Calibrated\n");
-
-    nanosleep(&sleepTime, NULL);
 }
 
+/// <summary>
+///     Gets eCO2 and TVOC results from CCS811 sensor and returns them in sensor results struct.
+/// </summary>
 CCS811Results_t readCCS811(void) {
 
     CCS811Results_t results;
@@ -50,6 +42,9 @@ CCS811Results_t readCCS811(void) {
     return results;
 }
 
+/// <summary>
+///     Calls functions to read all sensors and puts the results from all into a big struct, which it returns.
+/// </summary>
 SensorResults_t readSensors(void) {
     SensorResults_t results;
     results.timestamp = time(NULL);
@@ -62,19 +57,25 @@ SensorResults_t readSensors(void) {
 
     Log_Debug("Onboard Sensor: Temperature 1 %f, Temperature 2 %f\nCCS811 Sensor periodic: TVOC %d ppb, eCO2 %d ppm\n", results.onboardresults.lps22hhTemperature_degC, results.onboardresults.lsm6dsoTemperature_degC, results.ccs811results.tvoc, results.ccs811results.eco2);
 
-
-    results.counter = resultCounter;
+    results.counter = resultCounter; // used so we know how many times the sensors have been read since device last restarted, as first results often less accurate
     resultCounter++;
+
+    if (resultCounter % 10 == 0) {
+            ccs811_set_environmental_data(p_ccs, dhtresultsFromUart.dhtTemperature_degC, 30.0f);
+            //calibrate the co2 sensor to make predictions better
+    }
 
     return results;
 }
 
+// TODO: move init peripherals and handlers here
 int setUpSensors(void) {
     ccs811Setup();
     return 0;
 }
 
 int closeSensors(void) {
-    //need to close ccs
+    // TODO: need to close ccs
+    // TODO: work out if this is still needed
     return 0;
 }

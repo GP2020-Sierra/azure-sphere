@@ -59,16 +59,19 @@ static void processLine(void) {
         Log_Debug("dht %d ts temp %f hum %f\n", dhtresultsFromUart.timestamp, dhtresultsFromUart.dhtTemperature_degC, (dhtresultsFromUart.humidity));
     }
     if (!strcmp(sensor, "esp8266")) {
-        espresultsFromUart.devices = json_object_dotget_number(rootObject, "devs");
-        espresultsFromUart.basestations = json_object_dotget_number(rootObject, "bss");
+        espresultsFromUart.devices = (int)json_object_dotget_number(rootObject, "devs");
+        espresultsFromUart.basestations = (int)json_object_dotget_number(rootObject, "bss");
         espresultsFromUart.timestamp = time(NULL);
         Log_Debug("esp ts %d devs %d bss %d \n", (espresultsFromUart.timestamp), espresultsFromUart.devices, espresultsFromUart.basestations);
     }
 }
 
+/// <summary>
+///     Read incoming UART data. It is expected behavior that messages may be received in multiple
+///     partial chunks.
+///     From UART sample.
+/// </summary>
 void UartEventHandler(EventData *eventData) {
-    // Read incoming UART data. It is expected behavior that messages may be received in multiple
-    // partial chunks.
     ssize_t bytesRead = read(uartFd, &mainBuffer[bufferUsed], BUFFER_SIZE - bufferUsed - 1);
     if (bytesRead < 0) {
         Log_Debug("ERROR: Could not read UART: %s (%d).\n", strerror(errno), errno);

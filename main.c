@@ -1,13 +1,8 @@
-﻿/* Copyright (c) Microsoft Corporation. All rights reserved.
-   Licensed under the MIT License. */
-
-// This minimal Azure Sphere app repeatedly toggles GPIO 8, which is the red channel of RGB
-// LED 1 on the MT3620 RDB. Use this app to test that device and SDK installation succeeded
-// that you can build, deploy, and debug a CMake app with Visual Studio.
-//
-// It uses the API for the following Azure Sphere application libraries:
-// - gpio (digital input for button)
-// - log (messages shown in Visual Studio's Device Output window during debugging)
+﻿/* Copyright (c) . All rights reserved.
+   Licensed under the MIT License. 
+   
+   Based on Microsoft sample projects
+   */
 
 #include <stdbool.h>
 #include <errno.h>
@@ -23,16 +18,6 @@
 #include <applibs/gpio.h>
 #include <applibs/uart.h>
 
-// By default, this sample's CMake build targets hardware that follows the MT3620
-// Reference Development Board (RDB) specification, such as the MT3620 Dev Kit from
-// Seeed Studios.
-//
-// To target different hardware, you'll need to update the CMake build. The necessary
-// steps to do this vary depending on if you are building in Visual Studio, in Visual
-// Studio Code or via the command line.
-//
-// See https://github.com/Azure/azure-sphere-samples/tree/master/Hardware for more details.
-//
 // This #include imports the sample_hardware abstraction from that hardware definition.
 #include <hw/sample_hardware.h>
 
@@ -49,10 +34,12 @@
 #define TIME_BETWEEN_READINGS 10
 // time in seconds
 #define READINGS_BEFORE_SEND 6
+// limit on max message length
+#define MAX_MESSAGE_LENGTH 500
 
 // Support functions.
 static void TerminationHandler(int signalNumber);
-static int InitPeripheralsAndHandlers(void);
+static int InitMessagesPeripheralsAndHandlers(void);
 static void ClosePeripheralsAndHandlers(void);
 
 
@@ -82,12 +69,13 @@ static void TerminationHandler(int signalNumber)
     terminationRequired = true;
 }
 
+// TODO: move somewhere else, maybe split up
 /// <summary>
 ///     Set up SIGTERM termination handler, initialize peripherals and 
 ///     set up event handlers.
 /// </summary>
 /// <returns>0 on success, or -1 on failure</returns>
-static int InitPeripheralsAndHandlers(void)
+static int InitMessagesPeripheralsAndHandlers(void)
 {
     struct sigaction action;
     memset(&action, 0, sizeof(struct sigaction));
@@ -155,24 +143,26 @@ static void ClosePeripheralsAndHandlers(void) {
     close(i2cFd);
 }
 
-
+/// <summary>
+///     Puts results to be sent together into CSV-style string including column headings, and calls funtion to send to Azure
+/// </summary>
 void sendResults(SensorResults_t* results, int resultsLen) {
-    const unsigned int messageSize = 500;
-    char* csv = (char *)malloc(messageSize);
+    char* csv = (char *)malloc(MAX_MESSAGE_LENGTH);
     // timestamp, tempLPS, tempLSM, tempDHT, pressure, humidity, eco2, tvoc
     int n = 0;
     n = sprintf(csv, "{\"data\": \"timestamp,count,tempLPS,tempLSM,tempDHT,pressure,humidity,eco2,tvoc,devs,bss\\n");
     for (int i = 0; i < resultsLen; i++) {
         SensorResults_t result = results[i];
         n += sprintf(&csv[n], "%u,%u,%.2f,%.2f,%.2f,%.2f,%.2f,%d,%d,%u,%u\\n", result.timestamp, result.counter, result.onboardresults.lps22hhTemperature_degC, result.onboardresults.lsm6dsoTemperature_degC, result.dhtresults.dhtTemperature_degC, result.onboardresults.pressure_hPa, result.dhtresults.humidity, result.ccs811results.eco2, result.ccs811results.tvoc, result.espresults.devices, result.espresults.basestations);
+        // creating string by adding to end of previous string
     }
     n += sprintf(&csv[n], "\"}");
-    if (n<1) {
-        Log_Debug("CSV string write failed.");
-    } else {
-        Log_Debug("CSV string write succeeded");
-    }
-    SendTelemetryCSV(csv);
+    // if (n<1) {
+    //     Log_Debug("CSV string write failed.");
+    // } else {
+    //     Log_Debug("CSV string write succeeded");
+    // }
+    SendTelemetry(csv);
     free(csv);
 }
 
@@ -187,7 +177,7 @@ int main(int argc, char *argv[])
     
     ledAngry(); 
 
-    if (InitPeripheralsAndHandlers() != 0)
+    if (InitMessagesPeripheralsAndHandlers() != 0)
     {
         terminationRequired = true;
     }

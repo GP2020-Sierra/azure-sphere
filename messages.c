@@ -48,7 +48,7 @@ static void ReportStatusCallback(int result, void *context);
 static const char *GetReasonString(IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason);
 static const char *getAzureSphereProvisioningResultString(
     AZURE_SPHERE_PROV_RETURN_VALUE provisioningResult);
-void SendTelemetry(const unsigned char *key, const unsigned char *value);
+//void SendTelemetry(const unsigned char *key, const unsigned char *value);
 static void SetupAzureClient(void);
 
 // Function to generate simulated Temperature data/telemetry
@@ -389,7 +389,7 @@ static const char *getAzureSphereProvisioningResultString(
 /// <param name="value">new telemetry value</param>
 
 
-void SendTelemetryCSV(const unsigned char *csv)
+void SendTelemetry(const unsigned char *csv)
 {
     Log_Debug("Sending IoT Hub Message: %s\n", csv);
 

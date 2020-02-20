@@ -32,7 +32,6 @@ typedef struct SensorResults {
     DhtResults_t dhtresults;
 } SensorResults_t;
 
-
 SensorResults_t readSensors(void);
 
 int setUpSensors(void);

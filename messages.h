@@ -11,8 +11,6 @@
 
 int setUpMessages(int argc, char *argv[]);
 
-void SendTelemetry(const unsigned char *key, const unsigned char *value);
-
-void SendTelemetryCSV(const unsigned char *json);
+void SendTelemetry(const unsigned char *json);
 
 int iotConnect(void);
