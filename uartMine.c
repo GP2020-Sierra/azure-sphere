@@ -24,8 +24,8 @@ extern int uartFd;
 // Termination state
 extern volatile sig_atomic_t terminationRequired;
 
-extern EspResults_t* espresultsFromUart;
-extern DhtResults_t* dhtresultsFromUart;
+extern EspResults_t espresultsFromUart;
+extern DhtResults_t dhtresultsFromUart;
 
 #define BUFFER_SIZE 1024
 static size_t bufferUsed = 0;
@@ -35,8 +35,6 @@ static unsigned char* copyBuffer;
 void UartSetup() {
     mainBuffer = malloc(BUFFER_SIZE);
     copyBuffer = malloc(BUFFER_SIZE);
-    espresultsFromUart = malloc(sizeof(EspResults_t));
-    dhtresultsFromUart = malloc(sizeof(DhtResults_t));
 }
 
 static void processLine(void) {
@@ -55,18 +53,16 @@ static void processLine(void) {
     // TODO depending on the sensor type, update a global variable storing the last read sensor values.
     // then take/pass a copy of this in sensors.c
     if (!strcmp(sensor, "dht11")) {
-        dhtresultsFromUart->humidity = (float)json_object_dotget_number(rootObject, "humid");
-        dhtresultsFromUart->dhtTemperature_degC = (float)json_object_dotget_number(rootObject, "temp");
-        dhtresultsFromUart->timestamp = time(NULL);
-        Log_Debug("dht %d ts temp %f hum %f\n", dhtresultsFromUart->timestamp, dhtresultsFromUart->dhtTemperature_degC, (dhtresultsFromUart->humidity));
-        Log_Debug("dht\n");
+        dhtresultsFromUart.humidity = (float)json_object_dotget_number(rootObject, "humid");
+        dhtresultsFromUart.dhtTemperature_degC = (float)json_object_dotget_number(rootObject, "temp");
+        dhtresultsFromUart.timestamp = time(NULL);
+        Log_Debug("dht %d ts temp %f hum %f\n", dhtresultsFromUart.timestamp, dhtresultsFromUart.dhtTemperature_degC, (dhtresultsFromUart.humidity));
     }
     if (!strcmp(sensor, "esp8266")) {
-        Log_Debug("esp\n");
-        espresultsFromUart->devices = json_object_dotget_number(rootObject, "devs");
-        espresultsFromUart->basestations = json_object_dotget_number(rootObject, "bss");
-        espresultsFromUart->timestamp = time(NULL);
-        Log_Debug("esp ts %d devs %d bss %d \n", (espresultsFromUart->timestamp), espresultsFromUart->devices, espresultsFromUart->basestations);
+        espresultsFromUart.devices = json_object_dotget_number(rootObject, "devs");
+        espresultsFromUart.basestations = json_object_dotget_number(rootObject, "bss");
+        espresultsFromUart.timestamp = time(NULL);
+        Log_Debug("esp ts %d devs %d bss %d \n", (espresultsFromUart.timestamp), espresultsFromUart.devices, espresultsFromUart.basestations);
     }
 }
 
