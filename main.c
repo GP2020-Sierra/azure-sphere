@@ -43,9 +43,10 @@
 #include "sensors.h"
 #include "messages.h"
 #include "uartMine.h"
+#include "ledoutput.h"
 
 // Set to change frequency of readings and sending
-#define TIME_BETWEEN_READINGS 10
+#define TIME_BETWEEN_READINGS 5
 // time in seconds
 #define READINGS_BEFORE_SEND 6
 
@@ -58,6 +59,11 @@ static void ClosePeripheralsAndHandlers(void);
 int i2cFd = -1;
 int uartFd = -1;
 int epollFd = -1;
+
+
+int bluefd = -1;
+int redfd = -1;
+int greenfd = -1;
 
 // Termination state
 volatile sig_atomic_t terminationRequired = false;
@@ -175,6 +181,10 @@ void sendResults(SensorResults_t* results, int resultsLen) {
 int main(int argc, char *argv[])
 {
     Log_Debug("\n*** Starting ***\n");
+    
+    setLedFds(); //why does this break everything :(
+    
+    ledAngry(); 
 
     if (InitPeripheralsAndHandlers() != 0)
     {

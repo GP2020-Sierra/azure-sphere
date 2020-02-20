@@ -14,6 +14,8 @@
 #include <applibs/gpio.h>
 #include <applibs/storage.h>
 
+#include "ledoutput.h"
+
 #include <hw/sample_hardware.h>
 
 #include "epoll_timerfd_utilities.h"
@@ -58,8 +60,8 @@ static void ClosePeripheralsAndHandlers(void);
 
 // File descriptors - initialized to invalid value
 // LED
-static int deviceTwinStatusLedGpioFd = -1;
-static bool statusLedOn = false;
+// static int deviceTwinStatusLedGpioFd = -1;
+// static bool statusLedOn = false;
 
 // Timer / polling
 static int azureTimerFd = -1;
@@ -170,13 +172,13 @@ static int InitPeripheralsAndHandlers(void)
 
 
     // LED 4 Blue is used to show Device Twin settings state
-    Log_Debug("Opening SAMPLE_LED as output\n");
-    deviceTwinStatusLedGpioFd =
-        GPIO_OpenAsOutput(SAMPLE_LED, GPIO_OutputMode_PushPull, GPIO_Value_High);
-    if (deviceTwinStatusLedGpioFd < 0) {
-        Log_Debug("ERROR: Could not open LED: %s (%d).\n", strerror(errno), errno);
-        return -1;
-    }
+    // Log_Debug("Opening SAMPLE_LED as output\n");
+    // deviceTwinStatusLedGpioFd =
+    //     GPIO_OpenAsOutput(SAMPLE_LED, GPIO_OutputMode_PushPull, GPIO_Value_High);
+    // if (deviceTwinStatusLedGpioFd < 0) {
+    //     Log_Debug("ERROR: Could not open LED: %s (%d).\n", strerror(errno), errno);
+    //     return -1;
+    // }
 
     azureIoTPollPeriodSeconds = AzureIoTDefaultPollPeriodSeconds;
     struct timespec azureTelemetryPeriod = {azureIoTPollPeriodSeconds, 0};
@@ -197,12 +199,12 @@ static void ClosePeripheralsAndHandlers(void)
     Log_Debug("Closing file descriptors\n");
 
     // Leave the LEDs off
-    if (deviceTwinStatusLedGpioFd >= 0) {
-        GPIO_SetValue(deviceTwinStatusLedGpioFd, GPIO_Value_High);
-    }
+    // if (deviceTwinStatusLedGpioFd >= 0) {
+    //     GPIO_SetValue(deviceTwinStatusLedGpioFd, GPIO_Value_High);
+    // }
 
     CloseFdAndPrintError(azureTimerFd, "AzureTimer");
-    CloseFdAndPrintError(deviceTwinStatusLedGpioFd, "StatusLed");
+    // CloseFdAndPrintError(deviceTwinStatusLedGpioFd, "StatusLed");
     CloseFdAndPrintError(epollFd, "Epoll");
 }
 
@@ -216,6 +218,7 @@ static void HubConnectionStatusCallback(IOTHUB_CLIENT_CONNECTION_STATUS result,
 {
     iothubAuthenticated = (result == IOTHUB_CLIENT_CONNECTION_AUTHENTICATED);
     Log_Debug("IoT Hub Authenticated: %s\n", GetReasonString(reason));
+    ledHappy();
 }
 
 /// <summary>
@@ -308,14 +311,14 @@ static void TwinCallback(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned ch
         desiredProperties = rootObject;
     }
 
-    // Handle the Device Twin Desired Properties here.
-    JSON_Object *LEDState = json_object_dotget_object(desiredProperties, "StatusLED");
-    if (LEDState != NULL) {
-        statusLedOn = (bool)json_object_get_boolean(LEDState, "value");
-        GPIO_SetValue(deviceTwinStatusLedGpioFd,
-                      (statusLedOn == true ? GPIO_Value_Low : GPIO_Value_High));
-        TwinReportBoolState("StatusLED", statusLedOn);
-    }
+    // // Handle the Device Twin Desired Properties here.
+    // JSON_Object *LEDState = json_object_dotget_object(desiredProperties, "StatusLED");
+    // if (LEDState != NULL) {
+    //     statusLedOn = (bool)json_object_get_boolean(LEDState, "value");
+    //     // GPIO_SetValue(deviceTwinStatusLedGpioFd,
+    //                 //   (statusLedOn == true ? GPIO_Value_Low : GPIO_Value_High));
+    //     TwinReportBoolState("StatusLED", statusLedOn);
+    // }
 
 cleanup:
     // Release the allocated memory.
@@ -400,8 +403,10 @@ void SendTelemetryCSV(const unsigned char *csv)
     if (IoTHubDeviceClient_LL_SendEventAsync(iothubClientHandle, messageHandle, SendMessageCallback,
                                              /*&callback_param*/ 0) != IOTHUB_CLIENT_OK) {
         Log_Debug("WARNING: failed to hand over the message to IoTHubClient\n");
+        ledUnsure();
     } else {
         Log_Debug("INFO: IoTHubClient accepted the message for delivery\n");
+        ledHappy();
     }
 
     IoTHubMessage_Destroy(messageHandle);
