@@ -191,13 +191,13 @@ int main(int argc, char *argv[])
         int n = 0;
         while(1) {
             if((time(NULL) - result.timestamp) >= TIME_BETWEEN_READINGS) {
-                Log_Debug("Time for next reading");
+                Log_Debug("Time for next reading\n");
                 result = readSensors();
                 //len = snprintf(tempBuffer, 20, "%3.2f", results.onboardresults.lps22hhTemperature_degC);
                 resultsToSend[n] = result;
                 n += 1;
                 if (n==READINGS_BEFORE_SEND) {
-                    Log_Debug("Time to send");
+                    Log_Debug("Time to send\n");
                     sendResults(resultsToSend, READINGS_BEFORE_SEND);
                     n = 0;
                 }
