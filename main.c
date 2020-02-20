@@ -46,7 +46,7 @@
 #include "ledoutput.h"
 
 // Set to change frequency of readings and sending
-#define TIME_BETWEEN_READINGS 10
+#define TIME_BETWEEN_READINGS 5
 // time in seconds
 #define READINGS_BEFORE_SEND 6
 
@@ -161,10 +161,10 @@ void sendResults(SensorResults_t* results, int resultsLen) {
     char* csv = (char *)malloc(messageSize);
     // timestamp, tempLPS, tempLSM, tempDHT, pressure, humidity, eco2, tvoc
     int n = 0;
-    n = sprintf(csv, "{\"data\": \"timestamp,count,tempLPS,tempLSM,tempDHT,pressure,humidity,eco2,tvoc\\n");
+    n = sprintf(csv, "{\"data\": \"timestamp,count,tempLPS,tempLSM,tempDHT,pressure,humidity,eco2,tvoc,devs,bss\\n");
     for (int i = 0; i < resultsLen; i++) {
         SensorResults_t result = results[i];
-        n += sprintf(&csv[n], "%u,%u,%.2f,%.2f,%.2f,%.2f,%.2f,%d,%d\\n", result.timestamp, result.counter, result.onboardresults.lps22hhTemperature_degC, result.onboardresults.lsm6dsoTemperature_degC, 0.0, result.onboardresults.pressure_hPa, 0.0, result.ccs811results.eco2, result.ccs811results.tvoc);
+        n += sprintf(&csv[n], "%u,%u,%.2f,%.2f,%.2f,%.2f,%.2f,%d,%d\\n", result.timestamp, result.counter, result.onboardresults.lps22hhTemperature_degC, result.onboardresults.lsm6dsoTemperature_degC, result.dhtresults.dhtTemperature_degC, result.onboardresults.pressure_hPa, result.dhtresults.humidity, result.ccs811results.eco2, result.ccs811results.tvoc, result.espresults.devices, result.espresults.basestations);
     }
     n += sprintf(&csv[n], "\"}");
     if (n<1) {

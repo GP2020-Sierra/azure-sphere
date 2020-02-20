@@ -57,6 +57,9 @@ SensorResults_t readSensors(void) {
     results.ccs811results = readCCS811();
     results.onboardresults = readOnboardSensors();
 
+    results.espresults = *espresultsFromUart;
+    results.dhtresults = *dhtresultsFromUart;
+
     Log_Debug("Onboard Sensor: Temperature 1 %f, Temperature 2 %f\nCCS811 Sensor periodic: TVOC %d ppb, eCO2 %d ppm\n", results.onboardresults.lps22hhTemperature_degC, results.onboardresults.lsm6dsoTemperature_degC, results.ccs811results.tvoc, results.ccs811results.eco2);
 
 
