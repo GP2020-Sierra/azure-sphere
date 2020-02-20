@@ -19,8 +19,8 @@ typedef struct EspResults {
 
 typedef struct DhtResults {
     time_t timestamp;
-    int humidity;
-    int dhtTemperature_degC;
+    float humidity;
+    float dhtTemperature_degC;
 } DhtResults_t;
 
 typedef struct SensorResults {

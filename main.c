@@ -46,7 +46,7 @@
 #include "ledoutput.h"
 
 // Set to change frequency of readings and sending
-#define TIME_BETWEEN_READINGS 5
+#define TIME_BETWEEN_READINGS 10
 // time in seconds
 #define READINGS_BEFORE_SEND 6
 
@@ -54,6 +54,7 @@
 static void TerminationHandler(int signalNumber);
 static int InitPeripheralsAndHandlers(void);
 static void ClosePeripheralsAndHandlers(void);
+
 
 // File descriptors - initialized to invalid value
 int i2cFd = -1;

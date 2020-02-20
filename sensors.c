@@ -4,10 +4,15 @@
 #include "sensors.h"
 #include "onboard.h"
 #include <time.h>
+#include "uartMine.h"
 
 ccs811_t *p_ccs;
 extern int i2cFd;
 static long unsigned int resultCounter;
+
+
+EspResults_t* espresultsFromUart;
+DhtResults_t* dhtresultsFromUart;
 
 void ccs811Setup(void) {
     Log_Debug("Open CCS\n");
