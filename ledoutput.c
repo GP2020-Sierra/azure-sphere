@@ -31,6 +31,4 @@ void ledUnsure(void) {
     GPIO_SetValue(redfd, GPIO_Value_High);
     GPIO_SetValue(greenfd, GPIO_Value_High);
     GPIO_SetValue(bluefd, GPIO_Value_Low);
-    // yellow = red+green
-    // or just green = red+green :(
 }
