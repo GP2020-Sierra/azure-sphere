@@ -238,7 +238,7 @@ static void SetupAzureClient(void)
               getAzureSphereProvisioningResultString(provResult));
 
     if (provResult.result != AZURE_SPHERE_PROV_RESULT_OK) {
-
+        ledAngry();
         // If we fail to connect, reduce the polling frequency, starting at
         // AzureIoTMinReconnectPeriodSeconds and with a backoff up to
         // AzureIoTMaxReconnectPeriodSeconds
@@ -265,6 +265,8 @@ static void SetupAzureClient(void)
     SetTimerFdToPeriod(azureTimerFd, &azureTelemetryPeriod);
 
     iothubAuthenticated = true;
+
+    ledHappy();
 
     if (IoTHubDeviceClient_LL_SetOption(iothubClientHandle, OPTION_KEEP_ALIVE,
                                         &keepalivePeriodSeconds) != IOTHUB_CLIENT_OK) {
@@ -406,6 +408,7 @@ void SendTelemetry(const unsigned char *csv)
         ledUnsure();
     } else {
         Log_Debug("INFO: IoTHubClient accepted the message for delivery\n");
+        ledUnsure();
         ledHappy();
     }
 

@@ -31,7 +31,7 @@
 #include "ledoutput.h"
 
 // Set to change frequency of readings and sending
-#define TIME_BETWEEN_READINGS 10
+#define TIME_BETWEEN_READINGS 10 // value too low means no time to read uart
 // time in seconds
 #define READINGS_BEFORE_SEND 6
 // limit on max message length
