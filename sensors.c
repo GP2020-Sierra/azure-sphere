@@ -52,17 +52,19 @@ SensorResults_t readSensors(void) {
     results.ccs811results = readCCS811();
     results.onboardresults = readOnboardSensors();
 
+    Log_Debug("Onboard Sensor: Temperature 1 %f, Temperature 2 %f\nCCS811 Sensor periodic: TVOC %d ppb, eCO2 %d ppm\n", results.onboardresults.lps22hhTemperature_degC, results.onboardresults.lsm6dsoTemperature_degC, results.ccs811results.tvoc, results.ccs811results.eco2);
+
     results.espresults = espresultsFromUart;
     results.dhtresults = dhtresultsFromUart;
 
-    Log_Debug("Onboard Sensor: Temperature 1 %f, Temperature 2 %f\nCCS811 Sensor periodic: TVOC %d ppb, eCO2 %d ppm\n", results.onboardresults.lps22hhTemperature_degC, results.onboardresults.lsm6dsoTemperature_degC, results.ccs811results.tvoc, results.ccs811results.eco2);
+    Log_Debug("ESP ts %d dev %d DHT ts %d temp %f\n", results.espresults.timestamp, results.espresults.devices, results.dhtresults.timestamp, results.dhtresults.dhtTemperature_degC);
 
     results.counter = resultCounter; // used so we know how many times the sensors have been read since device last restarted, as first results often less accurate
     resultCounter++;
 
     if (resultCounter % 10 == 0) {
-            ccs811_set_environmental_data(p_ccs, dhtresultsFromUart.dhtTemperature_degC, 30.0f);
             //calibrate the co2 sensor to make predictions better
+            ccs811_set_environmental_data(p_ccs, dhtresultsFromUart.dhtTemperature_degC, dhtresultsFromUart.humidity);
     }
 
     return results;

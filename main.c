@@ -33,8 +33,9 @@
 // Set to change frequency of readings and sending
 #define TIME_BETWEEN_READINGS 10 // value too low means no time to read uart
 // time in seconds
-#define READINGS_BEFORE_SEND 6
+#define READINGS_BEFORE_SEND 3
 // limit on max message length
+// 500 is one message for free IoT Hubs, 4000 for paid standard tier hubs
 #define MAX_MESSAGE_LENGTH 500
 
 // Support functions.

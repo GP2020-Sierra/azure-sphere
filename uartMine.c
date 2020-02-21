@@ -56,13 +56,13 @@ static void processLine(void) {
         dhtresultsFromUart.humidity = (float)json_object_dotget_number(rootObject, "humid");
         dhtresultsFromUart.dhtTemperature_degC = (float)json_object_dotget_number(rootObject, "temp");
         dhtresultsFromUart.timestamp = time(NULL);
-        Log_Debug("dht %d ts temp %f hum %f\n", dhtresultsFromUart.timestamp, dhtresultsFromUart.dhtTemperature_degC, (dhtresultsFromUart.humidity));
+        // Log_Debug("dht ts %d temp %f hum %f\n", dhtresultsFromUart.timestamp, dhtresultsFromUart.dhtTemperature_degC, (dhtresultsFromUart.humidity));
     }
     if (!strcmp(sensor, "esp8266")) {
         espresultsFromUart.devices = (int)json_object_dotget_number(rootObject, "devs");
         espresultsFromUart.basestations = (int)json_object_dotget_number(rootObject, "bss");
         espresultsFromUart.timestamp = time(NULL);
-        Log_Debug("esp ts %d devs %d bss %d \n", (espresultsFromUart.timestamp), espresultsFromUart.devices, espresultsFromUart.basestations);
+        // Log_Debug("esp ts %d devs %d bss %d \n", (espresultsFromUart.timestamp), espresultsFromUart.devices, espresultsFromUart.basestations);
     }
 }
 

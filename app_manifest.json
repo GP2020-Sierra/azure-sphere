@@ -6,7 +6,7 @@
   "CmdArgs": ["0ne000C2425"],
   "Capabilities": {
     "Uart": [ "$SAMPLE_UART" ],
-    "AllowedConnections": [ "global.azure-devices-provisioning.net", "GP2020-Sierra.azure-devices.net" ],
+    "AllowedConnections": [ "global.azure-devices-provisioning.net", "GP2020-Sierra.azure-devices.net", "sierra.azure-devices.net" ],
     "Gpio": [ "$MT3620_RDB_LED1_GREEN", "$MT3620_RDB_LED1_RED", "$MT3620_RDB_LED1_BLUE",
        "$MT3620_GPIO35" ],
     "I2cMaster": [ "$MT3620_ISU2_I2C" ],
