@@ -62,10 +62,10 @@ SensorResults_t readSensors(void) {
     results.counter = resultCounter; // used so we know how many times the sensors have been read since device last restarted, as first results often less accurate
     resultCounter++;
 
-    if (resultCounter % 10 == 0) {
-            //calibrate the co2 sensor to make predictions better
-            ccs811_set_environmental_data(p_ccs, dhtresultsFromUart.dhtTemperature_degC, dhtresultsFromUart.humidity);
-    }
+    // if (resultCounter % 10 == 0) {
+    //         //calibrate the co2 sensor to make predictions better
+    //         ccs811_set_environmental_data(p_ccs, dhtresultsFromUart.dhtTemperature_degC, dhtresultsFromUart.humidity);
+    // }
 
     return results;
 }
