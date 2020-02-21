@@ -61,8 +61,8 @@ SensorResults_t readSensors(void) {
     resultCounter++;
 
     if (resultCounter % 10 == 0) {
-            ccs811_set_environmental_data(p_ccs, dhtresultsFromUart.dhtTemperature_degC, 30.0f);
             //calibrate the co2 sensor to make predictions better
+            ccs811_set_environmental_data(p_ccs, dhtresultsFromUart.dhtTemperature_degC, dhtresultsFromUart.humidity);
     }
 
     return results;
